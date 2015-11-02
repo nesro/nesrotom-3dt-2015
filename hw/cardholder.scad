@@ -1,8 +1,15 @@
-/*
-nesrotom@fit.cvut.cz
+/* nesrotom@fit.cvut.cz
 https://github.com/nesro/nesrotom-3dt-2015
-https://edux.fit.cvut.cz/courses/BI-3DT/classification/openscad-ukol
-*/
+https://edux.fit.cvut.cz/courses/BI-3DT/classification/openscad-ukol */
+
+
+
+
+
+
+
+
+
 
 
 
@@ -17,21 +24,33 @@ module cardholder(
 sx = size[0];
 sy = size[1];
 sz = size[2];
-
+sxs = sx + spacing;
+sys = sy + spacing;
+szs = sz + spacing;
+sxst = sxs + thickness;
+syst = sys + thickness;
+szst = szs + thickness;
+s  = spacing;
+st = spacing + thickness;
 
 difference() {
+	rotate(a=[0,90,0]) cylinder(r=st, h=sx, center=true);
+	rotate(a=[0,90,0]) cylinder(r=s, h=sx, center=true);
+}
+
+difference() {
+
+	/* krabicka s dirou na kartu uprostred */
 	difference() {
-		cube([sx+spacing,sy+spacing,sz+spacing], center=true);
-		cube([sx,sy,sz], center=true);
+		cube([sxst,syst,szst], center=true);
+		cube([sxs,sys,szs], center=true);
 	}
 
 	translate([
 /* 1. nejdriv si to co rezu soupnu ze "stredu" "okrajem"
    na osu.
    2. posunu to jeste o "pulku na druhou stranu */
-					(((sx+spacing)*visibility)/2)-
-						((sx+spacing)/2)
-					,0,0])
+					((sxs*visibility)/2)-(sxs/2)	,0,0])
 		cube(
 				[(sx+spacing)*visibility,
 				 (sy+spacing)*1,
