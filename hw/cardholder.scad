@@ -79,7 +79,7 @@ module cardholder(
     
     /* draw it! */
     if (will_it_draw) {
-    rotate([0,0,270])
+    rotate([0,0,90])
     translate([-(c*z+s+t+s+t),0,0])
     for (a =[0:c]) {
         translate([a*t*2,0,a*d]) //pousun o delta
