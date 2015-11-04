@@ -1,4 +1,5 @@
 
+/* comment this out before submission */
 $fn = 50;
 
 /* rounded cube */
@@ -35,8 +36,17 @@ module cardholder(
     delta=25,
     visibility=0.3)
 {
-    will_it_draw = true;
     /* validate arguments */
+    will_it_draw = true;
+        
+    if (len(size) < 2 || size[0] <= 0 || size[1] <= 0 ||
+        cards <= 0) {
+        will_it_draw = false;
+    }
+    
+    if (len(size) == 2) {
+        concat(size, 0);
+    }
     
     if (spacing < 0) {
 		spacing = 0;
@@ -54,6 +64,7 @@ module cardholder(
 		visibility = 1;
 	}
     
+    /* i need shortcuts because i have a small screen */
     x = size[0];
     y = size[1];
     z = size[2];
@@ -66,8 +77,9 @@ module cardholder(
     Y = y + s;
     Z = z + s;
     
-    
+    /* draw it! */
     if (will_it_draw) {
+    rotate([0,0,270])
     translate([-(c*z+s+t+s+t),0,0])
     for (a =[0:c]) {
         translate([a*t*2,0,a*d]) //pousun o delta
