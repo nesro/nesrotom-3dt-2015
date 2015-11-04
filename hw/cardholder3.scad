@@ -4,9 +4,11 @@
    in OpenSCAD. Yes. I have a small 13" monitor.
 /**************************************************/
 
+zero=0.0001;
+
 /* WARNING:
    comment out this line before submisson! */
-$fn = 500;
+$fn = 100;
 
 /**************************************************/
 
@@ -19,26 +21,26 @@ module mcc(x,y,z,r) {
         "this is bullthis probabaly");
     }
     
+    /* ten nejmensi necham nakonec? */
     cux = x-2*r;
     cuz = y-2*r;
     cuy = z/2;
     cyr = r;
-    cyh = z/2;
-    echo("mcc cux=",cux,", cuyy=",cuy,",cuz=",z,",cyr=",cyr,",cyh=",cyh);
+    cyh = y/2;
+    echo("mcc cux=",cux,", cuy=",cuy,",cuz=",cuz,",cyr=",cyr,",cyh=",cyh);
     
     //%cube([x,y,z], center=true);
     minkowski() {
-        cube([cux, cuy, cuz], center=true);
+        cube([cux, cuy, cuz], center=true); 
         cylinder(r=cyr, h=cyh, center=true);
     }
-    
-    /*
-    minkowski() {
-        cube([x-2*r, y-2*r, (z/2)], center=true);
-        cylinder(r=r, h=(z/2), center=true);
+}
+
+module card(x,y,z,t,s) {
+    difference() {
+        mcc(x,y,z,t+s);
+        mcc(x-z-s,y,z,t);
     }
-    
-    */
 }
 
 /**************************************************/
@@ -60,13 +62,29 @@ module cardholder(
     X = x + s;
     Y = y + s;
     Z = z + s;
-          
-difference() {
-mcc(x,y,z,t+s);
-mcc(x-z-s,y,z,t);
-}
-
-
+   
+    color("red")
+        translate([0,0,(y-(y*v))/2])
+            card(x,y-(y*v),z,t,s);
+    
+    
+    mh=t+s;
+    minkowski() {
+        cube([x - 2*t, z, mh/2], center=true); 
+        cylinder(r=t, h=mh/2, center=true);
+    }
+    
+    //card(x,z,y-(y*v),t,s);
+    
+    //translate([30,30,30])
+    //mcc(x,1,x,t+s);
+    
+    /*difference() {
+        color("red") card(x,y,z,t,s);
+    
+        translate([0,0,y*v/2-(y/2)])
+        color("blue") card(x,y*v+0.1,z,t,s);
+    }*/
 }
 
 cardholder();
