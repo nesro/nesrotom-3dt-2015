@@ -3,7 +3,7 @@
 /* nesrotom@fit.cvut.cz */
 
 /* comment this out before submission! */
-$fn = 10;
+//$fn = 10;
 
 /******************************************************/
 
@@ -19,6 +19,7 @@ module line(x) {
 offset(r=+3)
 line(10);*/
 
+/* TOHLE NEPOUZIVAM */
 /* rounded cube: square + offset + extrude */
 /* tohle ale nemuzu pouzit, protoze to nefunguje kdyz je
    y = 0 */
@@ -30,6 +31,7 @@ module rcSOE(x,y,z,r) {
     square([x,y],center=true);
 }
 
+/* TOHLE POUZIVAM (a budu pokud y==0 */
 /* rounded cube: 4 cylinders + hull */
 module rc4CH(x,y,z,r) {
     echo("rc4CH x=",x,",\ty=",y,",\tz=",z,",\tr=",r);
@@ -42,6 +44,7 @@ module rc4CH(x,y,z,r) {
     }
 }
 
+/* TOHLE ZATIM NEPOUZIVAM */
 /* rounded cube: 2 cylinders + cube (WIP!!!) */
 module rc2CC(x,y,z,r) {
     echo("rc2CC x=",x,",\ty=",y,",\tz=",z,",\tr=",r);
@@ -62,15 +65,14 @@ module rc(x,y,z,r) {
     rc4CH(x,y,z,r);
 }
 
-
 /* one card holder */
 module ch(x,y,z,s,t,down,v) {
     difference(){
-        rc(z,x,y*v,s+t);
-        rc(z,x,y*v,s);
+        rc(z,x,y,s+t);
+        rc(z,x,y,s);
     }
-    translate([0,0,(-y*v/2) +t/2 - down/2])
-    rc(z,x,t+down,s+t);
+    translate([0,0,(-y/2) +t/2 - down/2 + ((y*v)/2)])
+    rc(z,x,t+down+(y*v),s+t);
 }
 
 module draw_cardholder(x,y,z,t,s,c,d,v) {
@@ -81,7 +83,7 @@ module draw_cardholder(x,y,z,t,s,c,d,v) {
     translate([to_center,0,0]) //posun do prosted x
     for (a=[1:c]) { //pro kazdou kartu
         translate([a*t*2,0,a*d-XXX]) //pousun o delta
-        translate([0,0,(y*v)/2]) //na osu z
+        translate([0,0,(y)/2]) //na osu z
         ch(x,y,z,s,t,a*d-XXX,v); //jeden drzacek na kartu
     }
 }
@@ -97,12 +99,11 @@ module cardholder(
     /* i wrote this code after a lot of updog */
     draw = (len(size) < 2 || size[0] <= 0 ||
             size[1] <= 0 || cards <= 0) ? false : true;
-    visibility = (visibility < 0) ? 0 : visibility;
-    visibility = (1 < visibility) ? 1 : visibility;
+    visibility = (visibility < 0) ? 0 : (1 < visibility) ? 1 : visibility;
     thickness = (thickness < 0) ? 0 : thickness;
     spacing = (spacing < 0) ? 0 : spacing;
     size = len(size) == 2 ? concat(size, 0) : size;
-        
+    
     /* i need shortcuts because i have a small screen */
     x = size[0];
     y = size[1];
@@ -111,7 +112,7 @@ module cardholder(
     t = thickness;
     c = cards;
     d = -delta;
-    v = 1 - visibility;
+    v = visibility;
     
     if (draw) {
         draw_cardholder(x,y,z,t,s,c,d,v);
@@ -120,7 +121,7 @@ module cardholder(
 
 /******************************************************/
 /* tests */
-test_no = 2;
+test_no = 0;
 
 if (test_no == 1) {
     cardholder();
@@ -129,11 +130,6 @@ if (test_no == 1) {
 
 if (test_no == 2) {
     cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
-    echo("TEST #2: edux default copied <<<<<");
-}
-
-if (test_no == 222) {
-    cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=4, delta=25, visibility=0.5);
     echo("TEST #2: edux default copied <<<<<");
 }
 
@@ -194,13 +190,11 @@ if (test_no == 12) {
 if (test_no == 13) {
     cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=4, delta=25, visibility=-2);
     echo("TEST #13: visibility = -2 <<<<<");
-    echo("TEST #13: FIXME: tohle ma mit maximalni diru, ja nemam zadnou :D <<<<<");
 }
 
 if (test_no == 14) {
     cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=4, delta=25, visibility=2);
     echo("TEST #14: visibility = 2 <<<<<");
-    echo("TEST #14: FIXME: tohle ma mit malou dirku, ja mam docela velkou <<<<<");
 }
 
 if (test_no == 15) {
