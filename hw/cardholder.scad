@@ -64,22 +64,25 @@ module rc(x,y,z,r) {
 
 
 /* one card holder */
-module ch(x,y,z,s,t,down) {
+module ch(x,y,z,s,t,down,v) {
     difference(){
-        rc(z,x,y,s+t);
-        rc(z,x,y,s);
+        rc(z,x,y*v,s+t);
+        rc(z,x,y*v,s);
     }
-    translate([0,0,(-y/2) +t/2 - down/2])
+    translate([0,0,(-y*v/2) +t/2 - down/2])
     rc(z,x,t+down,s+t);
 }
 
 module draw_cardholder(x,y,z,t,s,c,d,v) {
+    XXX = d < 0 ? d*c : 0;
+    // black magic. done with the great trial and error techinque
+    to_center = c == 1 ? -((z+s+t+s)/1) : -((t+t+c*(z+s+s+t))/2);
     rotate([0,0,90]) //natoc aby  to bylo jako na eduxu
-    translate([-(c*z+s+t+s+t),0,0]) //posun do prosted x
+    translate([to_center,0,0]) //posun do prosted x
     for (a=[1:c]) { //pro kazdou kartu
-        translate([a*t*2,0,a*d]) //pousun o delta
+        translate([a*t*2,0,a*d-XXX]) //pousun o delta
         translate([0,0,(y*v)/2]) //na osu z
-        ch(x,y*v,z,s,t,a*d); //jeden drzacek na kartu
+        ch(x,y,z,s,t,a*d-XXX,v); //jeden drzacek na kartu
     }
 }
 
@@ -107,7 +110,7 @@ module cardholder(
     s = spacing;
     t = thickness;
     c = cards;
-    d = delta;
+    d = -delta;
     v = 1 - visibility;
     
     if (draw) {
@@ -117,7 +120,7 @@ module cardholder(
 
 /******************************************************/
 /* tests */
-test_no = 1;
+test_no = 2;
 
 if (test_no == 1) {
     cardholder();
@@ -126,6 +129,11 @@ if (test_no == 1) {
 
 if (test_no == 2) {
     cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
+    echo("TEST #2: edux default copied <<<<<");
+}
+
+if (test_no == 222) {
+    cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=4, delta=25, visibility=0.5);
     echo("TEST #2: edux default copied <<<<<");
 }
 
@@ -179,9 +187,8 @@ if (test_no == 11) {
 }
 
 if (test_no == 12) {
-    cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=4, delta=-5, visibility=0.3);
-    echo("TEST #12: delta == -5 <<<<<");
-    echo("TEST #12: FIXME: negeneruju dno <<<<<");
+    cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=4, delta=-25, visibility=0.3);
+    echo("TEST #12: delta = -delta <<<<<");
 }
 
 if (test_no == 13) {
@@ -201,7 +208,17 @@ if (test_no == 15) {
     echo("TEST #15: only 1 card <<<<<");
 }
 
-if (test_no == 15) {
-    cardholder(size=[85, 54, 1], thickness=3, spacing=10, cards=1, delta=25, visibility=0.3);
-    echo("TEST #15: 10 cards <<<<<");
+if (test_no == 16) {
+    cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=10, delta=25, visibility=0.3);
+    echo("TEST #16: 10 cards <<<<<");
+}
+
+if (test_no == 17) {
+    cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=50, delta=25, visibility=0.3);
+    echo("TEST #17: 50 cards <<<<<");
+}
+
+if (test_no == 18) {
+    cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=2, delta=25, visibility=0.3);
+    echo("TEST #18: 2 cards <<<<<");
 }
