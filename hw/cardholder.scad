@@ -68,18 +68,18 @@ module rc(x,y,z,r) {
 /* one card holder */
 module ch(x,y,z,s,t,down,v) {
     difference(){
-        rc(z,x,y,s+t);
-        rc(z,x,y,s);
+        color("blue")rc(z,x,y,s+t);
+        color("red")rc(z,x,y,s);
     }
-    translate([0,0,(-y/2) +t/2 - down/2 + ((y*v)/2)])
-    rc(z,x,t+down+(y*v),s+t);
+    //translate([0,0,(-y/2) +t/2 - down/2 + ((y*v)/2)])
+    //rc(z,x,t+down+(y*v),s+t);
 }
 
 module draw_cardholder(x,y,z,t,s,c,d,v) {
     XXX = d < 0 ? d*c : 0;
     // black magic. done with the great trial and error techinque
     to_center = c == 1 ? -((z+s+t+s)/1) : -((t+t+c*(z+s+s+t))/2);
-    rotate([0,0,90]) //natoc aby  to bylo jako na eduxu
+    rotate([0,0,270]) //natoc aby  to bylo jako na eduxu
     translate([to_center,0,0]) //posun do prosted x
     for (a=[1:c]) { //pro kazdou kartu
         translate([a*t*2,0,a*d-XXX]) //pousun o delta
@@ -104,6 +104,9 @@ module cardholder(
     spacing = (spacing < 0) ? 0 : spacing;
     size = len(size) == 2 ? concat(size, 0) : size;
     
+    echo("draw",draw,"visibility",visibility,"thickness",thickness,
+        "spacing",spacing,"size",size);
+    
     /* i need shortcuts because i have a small screen */
     x = size[0];
     y = size[1];
@@ -121,7 +124,7 @@ module cardholder(
 
 /******************************************************/
 /* tests */
-test_no = 0;
+test_no = 10;
 
 if (test_no == 1) {
     cardholder();
@@ -173,7 +176,7 @@ if (test_no == 9) {
 }
 
 if (test_no == 10) {
-    cardholder(size=[85, 54, 1], thickness=3, spacing=-3, cards=4, delta=25, visibility=0.3);
+    cardholder(size=[85, 54, 10], thickness=30, spacing=-3, cards=1, delta=25, visibility=0.3);
     echo("TEST #10: spacing < 0 <<<<<");
 }
 
