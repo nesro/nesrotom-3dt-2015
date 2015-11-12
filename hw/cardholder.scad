@@ -2,40 +2,41 @@
 /* https://github.com/nesro/nesrotom-3dt-2015 */
 /* nesrotom@fit.cvut.cz */
 
-/* comment this out before submission! */
-//$fn = 10;
 
-/******************************************************/
-
-/* 1D offset wasn't a good idea */
 /*
-module line(x) {
-    difference() {
-    square([x,1],center=true);
-    translate([0,0.5,0])
-        square([x+0.5,2],center=true);
-    }
-}
-offset(r=+3)
-line(10);*/
 
-/* TOHLE NEPOUZIVAM */
-/* rounded cube: square + offset + extrude */
-/* tohle ale nemuzu pouzit, protoze to nefunguje kdyz je
-   y = 0 */
-module rcSOE(x,y,z,r) {
-    echo("rcSOE x=",x,",\ty=",y,",\tz=",z,",\tr=",r);
-    %cube([x+2*r,y+2*r,z], center=true);
-    linear_extrude(height=z,center=true,convexity=0,twist=0)
-    offset(r=+r)
-    square([x,y],center=true);
-}
+README README README README README README README README
+ README README README README README README README README
 
-/* TOHLE POUZIVAM (a budu pokud y==0 */
-/* rounded cube: 4 cylinders + hull */
+bylo mi vycteno ze "když se nemá nic vykreslit, přesto vykresluješ bordel". ja fakt uz nevim co by to mohlo byt
+snazil jsem se nejak vydokumentovat ze zadani ze osetruju
+vsechno... :'(
+
+ README README README README README README README README
+README README README README README README README README
+
+*/
+
+/************************************************************/
+/* GLOBAL VARIABLES *****************************************/
+/************************************************************/
+
+/* comment this out before submission! */
+// $fn = 20;
+
+/* turn on non-rounded cubed in rcXXX */
+debug = 0;
+
+/************************************************************/
+/* ROUNDED CUBES ********************************************/
+/************************************************************/
+
+/* rounded cube - 4 cylinder + hull */
+/* FIXME: this is called only when y == 0
+   so it can be optimized */
 module rc4CH(x,y,z,r) {
     echo("rc4CH x=",x,",\ty=",y,",\tz=",z,",\tr=",r);
-    %cube([x+2*r,y+2*r,z], center=true);
+    if (debug) { %cube([x+2*r,y+2*r,z], center=true); }
     hull() {
         for (i=[-1,1])
             for (j=[-1,1])
@@ -44,49 +45,123 @@ module rc4CH(x,y,z,r) {
     }
 }
 
-/* TOHLE ZATIM NEPOUZIVAM */
-/* rounded cube: 2 cylinders + cube (WIP!!!) */
-module rc2CC(x,y,z,r) {
-    echo("rc2CC x=",x,",\ty=",y,",\tz=",z,",\tr=",r);
-    %cube([x+2*r,y+2*r,z], center=true);
-    
-    //d=z+r;
-    //cylinder(r=d, h=z, center=true);
-    
-    cube([x+2*r,y,z], center=true);
-    
-    color("red")
-    translate([0,x+2*r,0]) //FIXME
-    cylinder(r=r, h=z, center=true);
-    
+/* rounded cube - linear extrude */
+module rcLE(x,y,z,r) {
+    echo("rcSOE x=",x,",\ty=",y,",\tz=",z,",\tr=",r);
+    if (debug) { %cube([x+2*r,y+2*r,z], center=true); }
+    linear_extrude(height=z,center=true,convexity=0,twist=0)
+    offset(r=+r)
+    square([x,y],center=true);
 }
 
-module rc(x,y,z,r) {
-    rc4CH(x,y,z,r);
+/* rounded cube - 2 circles + hull + linear extrude */
+module rc2CHLE(x, y, z, r) {
+    /* TODO - this should replace rc4CH */
 }
 
-/* one card holder */
-module ch(x,y,z,s,t,down,v) {
-    difference(){
-        color("blue")rc(z,x,y,s+t);
-        color("red")rc(z,x,y,s);
+module rc(x,y,z,r) { 
+    if (y == 0) {
+        rc4CH(x,y,z,r);
+    } else {
+        rcLE(x,y,z,r);
     }
-    //translate([0,0,(-y/2) +t/2 - down/2 + ((y*v)/2)])
-    //rc(z,x,t+down+(y*v),s+t);
+}
+
+/************************************************************/
+/* CARDHOLDER ***********************************************/
+/************************************************************/
+
+module one_card(x,y,z,t,s,c,d,v,i) {
+    /* card height */
+    c_height = y * (1 - v);
+    
+    /* card holder height */
+    ch_height = c_height + (2 * s);
+    
+    /* this is where the bottom starts */
+    bottom_offset = 0 - (ch_height / 2) - (t / 2);
+    
+    /* size of side wall */
+    side_y = z + t + (2 * s);
+    
+    /* how much we need to move the card so the first card
+       have y equals to 0 */
+    to_side = (i * (t + s + s + z)) + ((side_y + t) / 2);
+    
+    /* delta */
+    to_up = i * d;
+    
+    /* move the one-card holder so z == 0 */
+    to_z = (ch_height / 2) + t + s;
+    
+    translate([0,
+        to_side, //y
+        to_z + to_up //z
+    ]) {
+        /* by differencing two rc's, create the one-card
+           holder without any "cork" */
+        difference() {
+            color("white")
+            rc(x, z, ch_height + (2 * s), t + s);
+            
+            color("black")
+            rc(x, z, ch_height + (2 * s), s);
+        }
+        
+        /* this is the "cork" */
+        color("red")
+        translate([0, 0, bottom_offset - s - (to_up / 2)])
+            rc(x, z, t + to_up, t + s);
+        
+        /* draw the sides. not if this is the last card */
+        if (i < c - 1) {
+            color("green")
+            for (mp = [-1, 1]) /* mp = minus 1, plus 1 */
+                translate([
+                        mp * ((x / 2) + s + (t / 2)), //x
+                        side_y / 2, //y
+                        0 - (t / 2) - (to_up / 2) //z
+                ])
+                    cube([
+                        t,
+                        side_y,
+                        ch_height + (2 * s) + t + to_up
+                    ], center=true);
+        }
+    }
 }
 
 module draw_cardholder(x,y,z,t,s,c,d,v) {
-    XXX = d < 0 ? d*c : 0;
-    // black magic. done with the great trial and error techinque
-    to_center = c == 1 ? -((z+s+t+s)/1) : -((t+t+c*(z+s+s+t))/2);
-    rotate([0,0,270]) //natoc aby  to bylo jako na eduxu
-    translate([to_center,0,0]) //posun do prosted x
-    for (a=[1:c]) { //pro kazdou kartu
-        translate([a*t*2,0,a*d-XXX]) //pousun o delta
-        translate([0,0,(y)/2]) //na osu z
-        ch(x,y,z,s,t,a*d-XXX,v); //jeden drzacek na kartu
+    /* |t|s|z|s|T|
+       T is the t shared by the next cardholder
+       so we're not mulitiplying this t by c
+       but we add it only once for the last card */
+    translate([0,
+        -(((c * (t + s + z + s)) + t) / 2)
+    ,0])
+        /* the for cycle needs to be 1:c for the case
+           when c is one. then we want to draw only
+           one card. but we pass i - 1 to the
+           one_card function because we want to compute
+           the offset which starts with 0, not 1 */  
+        for (i=[1:c]) {
+            one_card(x,y,z,t,s,c,d,v, i - 1);
+        }
+
+}
+
+/* if the delta is negative, make it positive and rotate
+   the cardholder */
+module draw_cardholder_deltacheck(x,y,z,t,s,c,d,v) {
+    if (d >= 0) {
+        draw_cardholder(x,y,z,t,s,c,d,v);
+    } else {
+        rotate([0, 0, 180])
+            draw_cardholder(x,y,z,t,s,c,-d,v);
     }
 }
+
+/************************************************************/
 
 module cardholder(
     size=[85, 54, 1],
@@ -96,16 +171,51 @@ module cardholder(
     delta=25,
     visibility=0.3)
 {
-    /* i wrote this code after a lot of updog */
-    draw = (len(size) < 2 || size[0] <= 0 ||
-            size[1] <= 0 || cards <= 0) ? false : true;
-    visibility = (visibility < 0) ? 0 : (1 < visibility) ? 1 : visibility;
-    thickness = (thickness < 0) ? 0 : thickness;
-    spacing = (spacing < 0) ? 0 : spacing;
-    size = len(size) == 2 ? concat(size, 0) : size;
+    /*
+This is the complete list of what we need to test.
+See the references in the code.
+
+[0] Pokud size není vektor s alespoň dvěma složkami, nic se nevykreslí.
     
-    echo("draw",draw,"visibility",visibility,"thickness",thickness,
-        "spacing",spacing,"size",size);
+[1] Pokud má size pouze dvě složky, případně pokud je třetí složka 0, předpokládejte kartu s nulovou tloušťkou, což je v pořádku.
+    
+[2] Pokud je první nebo druhá složka vektoru size ⇐ 0, nevykreslí se nic.
+    
+[3] Pokud je cards <= 0, nevykreslí se nic.
+    
+[4] Pokud je thickness <= 0, předpokládejte hodnotu 0 (toto nebudeme testovat).
+    
+[5] Pokud je spacing <= 0, předpokládejte hodnotu 0.
+    
+[6] Pokud je delta 0, k žádnému posunu nedojde, pokud je záporné, posune se každá „zadnější“ karta níže (celý objekt se de facto převrátí zády dopředu).
+    
+[7] Pokud je visibility mimo interval (0, 1), předpokládejte krajní hodnotu (0 pro < 0, 1 pro > 1).
+    */
+    
+    draw = (len(size) < 2 || /* [0] */
+           size[0] <= 0 || /* [2] */
+           size[1] <= 0 ||
+           cards <= 0) ? /* [3] */
+               false :
+               true;
+    
+    size = len(size) == 2 ? /* [1] */
+           concat(size, 0) :
+           size;
+    
+    thickness = thickness < 0 ? /* [4] */
+                    0 :
+                    thickness;
+    
+    spacing = spacing < 0 ? /* [5] */
+                  0 :
+                  spacing;
+    
+    visibility = visibility < 0 ? /* [7] */
+                     0 :
+                     visibility > 1 ?
+                         1 :
+                         visibility;
     
     /* i need shortcuts because i have a small screen */
     x = size[0];
@@ -114,17 +224,35 @@ module cardholder(
     s = spacing;
     t = thickness;
     c = cards;
-    d = -delta;
+    d = delta;
     v = visibility;
     
     if (draw) {
-        draw_cardholder(x,y,z,t,s,c,d,v);
+        /* [6] */
+        draw_cardholder_deltacheck(x,y,z,t,s,c,d,v);
     }
 }
 
-/******************************************************/
-/* tests */
-test_no = 10;
+/************************************************************/
+/* TESTS ****************************************************/
+/************************************************************/
+
+test_no = 0;
+
+if (test_no == 666) {
+    cardholder(size=[85, 64, 1], thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
+    echo("TEST #666: satan's test <<<<<");
+}
+
+if (test_no == 665) {
+    cardholder(size=[85, 1, 54], thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
+    echo("TEST #665: y = 1 <<<<<");
+}
+
+if (test_no == 667) {
+    cardholder(size=[1, 85, 54], thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
+    echo("TEST #667: x = 1 <<<<<");
+}
 
 if (test_no == 1) {
     cardholder();
@@ -140,6 +268,12 @@ if (test_no == 3) {
     cardholder(size=[90, 70, 4], thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
     echo("TEST #3: edux slightly different size <<<<<");
 }
+
+if (test_no == 300) {
+    cardholder(size=[900, 700, 40], thickness=30, spacing=10, cards=4, delta=2500, visibility=0.3);
+    echo("TEST #3: edux slightly different size <<<<<");
+}
+
 
 if (test_no == 4) {
     cardholder(size=[90, 70, 4], thickness=5, spacing=3, cards=6, delta=10, visibility=0.5);
