@@ -2,27 +2,12 @@
 /* https://github.com/nesro/nesrotom-3dt-2015 */
 /* nesrotom@fit.cvut.cz */
 
-
-/*
-
-README README README README README README README README
- README README README README README README README README
-
-bylo mi vycteno ze "když se nemá nic vykreslit, přesto vykresluješ bordel". ja fakt uz nevim co by to mohlo byt
-snazil jsem se nejak vydokumentovat ze zadani ze osetruju
-vsechno... :'(
-
- README README README README README README README README
-README README README README README README README README
-
-*/
-
 /************************************************************/
 /* GLOBAL VARIABLES *****************************************/
 /************************************************************/
 
 /* comment this out before submission! */
-// $fn = 20;
+$fn = 20;
 
 /* turn on non-rounded cubed in rcXXX */
 debug = 0;
@@ -192,7 +177,8 @@ See the references in the code.
 [7] Pokud je visibility mimo interval (0, 1), předpokládejte krajní hodnotu (0 pro < 0, 1 pro > 1).
     */
     
-    draw = (len(size) < 2 || /* [0] */
+    draw = (!len(size) || /* [0] */
+           len(size) < 2 ||
            size[0] <= 0 || /* [2] */
            size[1] <= 0 ||
            cards <= 0) ? /* [3] */
@@ -237,7 +223,13 @@ See the references in the code.
 /* TESTS ****************************************************/
 /************************************************************/
 
-test_no = 0;
+test_no = 1;
+
+if (test_no == 42) {
+    cardholder(size=5, thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
+    echo("TEST #42: size is a number. <<<<<");
+    echo("TEST #42: NOTHING SHALL BE GENERATED <<<<<");
+}
 
 if (test_no == 666) {
     cardholder(size=[85, 64, 1], thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
