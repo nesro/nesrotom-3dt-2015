@@ -3,7 +3,7 @@
 /* nesrotom@fit.cvut.cz */
 
 /************************************************************/
-/* GLOBAL VARIABLES *****************************************/
+/* GLOBAL VARIABLES + DEBUGGING *****************************/
 /************************************************************/
 
 /* comment this out before submission! */
@@ -11,7 +11,9 @@ $fn = 50;
 
 /* turn on non-rounded cubed in rcXXX */
 debug = 0;
-debug_show_card = 1;
+
+/* show the card. (this will draw the cardholder with % - so use F5 only! ) */
+debug_show_card = 0;
 
 /************************************************************/
 /* ROUNDED CUBES ********************************************/
@@ -57,42 +59,10 @@ module rc(x,y,z,r) {
 /* CARDHOLDER ***********************************************/
 /************************************************************/
 
-module one_card(x,y,z,t,s,c,d,v,i) {
-    /* card height */
-    c_height = y * (1 - v);
-    
-    /* card holder height */
-    ch_height = c_height + s; /* FIXME */
-    
-    /* this is where the bottom starts */
-    bottom_offset = 0 - (ch_height / 2) - (t / 2);
-    
-    /* size of side wall */
-    side_y = z + t + (2 * s);
-    
-    /* how much we need to move the card so the first card
-       have y equals to 0 */
-    to_side = (i * (t + s + s + z)) + ((side_y + t) / 2);
-    
-    /* delta */
-    to_up = i * d;
-    
-    /* move the one card holder so z == 0 */
-    to_z = (ch_height / 2) + t;
-    
-    /* draw the card */
-    if (debug_show_card) {
-        to_z_card = (y / 2) + s + t;
-        translate([0,
-            to_side, //y
-            to_z_card + to_up //z
-        ])
-            color("red")
-            //cube([x,z,c_height], center=true);
-            cube([x,z,y], center=true);
-    }
-    
-    %translate([0,
+/* see module one_card how the args for this function are computed */ 
+module one_card_draw(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z) {
+
+    translate([0,
         to_side, //y
         to_z + to_up //z
     ]) {
@@ -126,6 +96,46 @@ module one_card(x,y,z,t,s,c,d,v,i) {
                         ch_height + t + to_up
                     ], center=true);
         }
+    }
+}
+
+module one_card(x,y,z,t,s,c,d,v,i) {
+    /* card height */
+    c_height = y * (1 - v);
+    
+    /* card holder height */
+    ch_height = c_height + s; /* FIXME */
+    
+    /* this is where the bottom starts */
+    bottom_offset = 0 - (ch_height / 2) - (t / 2);
+    
+    /* size of side wall */
+    side_y = z + t + (2 * s);
+    
+    /* how much we need to move the card so the first card
+       have y equals to 0 */
+    to_side = (i * (t + s + s + z)) + ((side_y + t) / 2);
+    
+    /* delta */
+    to_up = i * d;
+    
+    /* move the one card holder so z == 0 */
+    to_z = (ch_height / 2) + t;
+    
+    /* draw the card */
+    if (debug_show_card) {
+        to_z_card = (y / 2) + s + t;
+        translate([0,
+            to_side, //y
+            to_z_card + to_up //z
+        ])
+            color("red")
+            cube([x,z,y], center=true);
+        
+        %one_card_draw(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z);
+    } else {
+        /* if we don't draw the card, draw cardholder normally */
+        one_card_draw(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z);
     }
 }
 
@@ -170,7 +180,7 @@ module cardholder(
     visibility=0.3)
 {
     /*
-This is the complete list of what we need to test.
+This is the complete list of what we need to test (in Czech).
 See the references in the code.
 
 [0] Pokud size není vektor s alespoň dvěma složkami, nic se nevykreslí.
@@ -226,6 +236,8 @@ See the references in the code.
     d = delta;
     v = visibility;
     
+    echo(draw);
+    
     if (draw) {
         /* [6] */
         draw_cardholder_deltacheck(y,x,z,t,s,c,d,v);
@@ -236,9 +248,20 @@ See the references in the code.
 /* TESTS ****************************************************/
 /************************************************************/
 
-test_no = 2;
+test_no = 0;
+test_no_str = "edux";
 
-if (test_no == 2) {
+if (test_no_str == "small") {
+    cardholder(size=[8.5, 5.4, 0.1], thickness=0.3, spacing=0.1, cards=4, delta=2.5, visibility=0.3);
+    echo("TEST small: very small <<<<<");
+}
+
+if (test_no_str == "big") {
+    cardholder(size=[8500, 5400, 100], thickness=300, spacing=100, cards=4, delta=2500, visibility=0.3);
+    echo("TEST big: very big <<<<<");
+}
+
+if (test_no_str == "edux") {
     cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
     echo("TEST #2: edux default copied <<<<<");
 }
