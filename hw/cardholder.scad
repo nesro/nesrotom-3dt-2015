@@ -7,7 +7,7 @@
 /************************************************************/
 
 /* comment this out before submission! */
-$fn = 50;
+//$fn = 50;
 
 /* turn on non-rounded cubed in rcXXX */
 debug = 0;
@@ -104,7 +104,7 @@ module one_card(x,y,z,t,s,c,d,v,i) {
     c_height = y * (1 - v);
     
     /* card holder height */
-    ch_height = c_height + s; /* FIXME */
+    ch_height = c_height + s; /* FIXME (TADY NEVIM JESTLI TO POCITAM SPRAVNE) */
     
     /* this is where the bottom starts */
     bottom_offset = 0 - (ch_height / 2) - (t / 2);
@@ -249,7 +249,7 @@ See the references in the code.
 /************************************************************/
 
 test_no = 0;
-test_no_str = "edux";
+test_no_str = "none";
 
 if (test_no_str == "small") {
     cardholder(size=[8.5, 5.4, 0.1], thickness=0.3, spacing=0.1, cards=4, delta=2.5, visibility=0.3);
