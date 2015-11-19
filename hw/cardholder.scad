@@ -7,10 +7,11 @@
 /************************************************************/
 
 /* comment this out before submission! */
-$fn = 20;
+$fn = 50;
 
 /* turn on non-rounded cubed in rcXXX */
 debug = 0;
+debug_show_card = 1;
 
 /************************************************************/
 /* ROUNDED CUBES ********************************************/
@@ -61,7 +62,7 @@ module one_card(x,y,z,t,s,c,d,v,i) {
     c_height = y * (1 - v);
     
     /* card holder height */
-    ch_height = c_height + (2 * s);
+    ch_height = c_height + s; /* FIXME */
     
     /* this is where the bottom starts */
     bottom_offset = 0 - (ch_height / 2) - (t / 2);
@@ -76,31 +77,43 @@ module one_card(x,y,z,t,s,c,d,v,i) {
     /* delta */
     to_up = i * d;
     
-    /* move the one-card holder so z == 0 */
-    to_z = (ch_height / 2) + t + s;
+    /* move the one card holder so z == 0 */
+    to_z = (ch_height / 2) + t;
     
-    translate([0,
+    /* draw the card */
+    if (debug_show_card) {
+        to_z_card = (y / 2) + s + t;
+        translate([0,
+            to_side, //y
+            to_z_card + to_up //z
+        ])
+            color("red")
+            //cube([x,z,c_height], center=true);
+            cube([x,z,y], center=true);
+    }
+    
+    %translate([0,
         to_side, //y
         to_z + to_up //z
     ]) {
         /* by differencing two rc's, create the one-card
            holder without any "cork" */
         difference() {
-            color("white")
-            rc(x, z, ch_height + (2 * s), t + s);
+            //color("blue")
+            rc(x, z, ch_height, t + s);
             
-            color("black")
-            rc(x, z, ch_height + (2 * s), s);
+            //color("blue")
+            rc(x, z, ch_height, s);
         }
         
         /* this is the "cork" */
-        color("red")
-        translate([0, 0, bottom_offset - s - (to_up / 2)])
+        //color("blue")
+        translate([0, 0, bottom_offset  - (to_up / 2)])
             rc(x, z, t + to_up, t + s);
         
         /* draw the sides. not if this is the last card */
         if (i < c - 1) {
-            color("green")
+            //color("green")
             for (mp = [-1, 1]) /* mp = minus 1, plus 1 */
                 translate([
                         mp * ((x / 2) + s + (t / 2)), //x
@@ -110,7 +123,7 @@ module one_card(x,y,z,t,s,c,d,v,i) {
                     cube([
                         t,
                         side_y,
-                        ch_height + (2 * s) + t + to_up
+                        ch_height + t + to_up
                     ], center=true);
         }
     }
@@ -204,9 +217,9 @@ See the references in the code.
                          visibility;
     
     /* i need shortcuts because i have a small screen */
-    x = size[0];
-    y = size[1];
-    z = size[2];   
+    x = size[0]; /* výška karty */
+    y = size[1]; /* šířka karty */
+    z = size[2]; /* tloušťka */
     s = spacing;
     t = thickness;
     c = cards;
@@ -215,7 +228,7 @@ See the references in the code.
     
     if (draw) {
         /* [6] */
-        draw_cardholder_deltacheck(x,y,z,t,s,c,d,v);
+        draw_cardholder_deltacheck(y,x,z,t,s,c,d,v);
     }
 }
 
@@ -223,7 +236,12 @@ See the references in the code.
 /* TESTS ****************************************************/
 /************************************************************/
 
-test_no = 1;
+test_no = 2;
+
+if (test_no == 2) {
+    cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
+    echo("TEST #2: edux default copied <<<<<");
+}
 
 if (test_no == 42) {
     cardholder(size=5, thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
@@ -251,7 +269,7 @@ if (test_no == 1) {
     echo("TEST #1: edux default <<<<<");
 }
 
-if (test_no == 2) {
+if (test_no == 2000) {
     cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
     echo("TEST #2: edux default copied <<<<<");
 }
