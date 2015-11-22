@@ -7,7 +7,7 @@
 /************************************************************/
 
 /* comment this out before submission! */
-// $fn = 42;
+//$fn = 50;
 
 /* turn on non-rounded cubed in rcXXX */
 debug = 0;
@@ -19,8 +19,22 @@ debug_show_card = 0;
 /* ROUNDED CUBES ********************************************/
 /************************************************************/
 
-/* rounded cube - linear extrude - 4 rounded corners */
-module r4cLE(x,y,z,r, dozadu) {
+/* rounded cube - 4 cylinder + hull */
+/* FIXME: this is called only when y == 0
+   so it can be optimized */
+module rc4CH(x,y,z,r) {
+    echo("rc4CH x=",x,",\ty=",y,",\tz=",z,",\tr=",r);
+    if (debug) { %cube([x+2*r,y+2*r,z], center=true); }
+    hull() {
+        for (i=[-1,1])
+            for (j=[-1,1])
+                translate([(i*x/2),(j*y/2),0]) 
+                    cylinder(r=r, h=z, center=true);
+    }
+}
+
+/* rounded cube - linear extrude */
+module rcLE(x,y,z,r) {
     echo("rcSOE x=",x,",\ty=",y,",\tz=",z,",\tr=",r);
     if (debug) { %cube([x+2*r,y+2*r,z], center=true); }
     linear_extrude(height=z,center=true,convexity=0,twist=0)
@@ -28,39 +42,16 @@ module r4cLE(x,y,z,r, dozadu) {
     square([x,y],center=true);
 }
 
-/* rounded cube - linear extrude - 2 rounded corners */
-module r2cLE(x,y,z,r,dozadu) {
-    echo("rcSOE x=",x,",\ty=",y,",\tz=",z,",\tr=",r);
-    if (debug) { %cube([x+2*r,y+2*r,z], center=true); }
-    
-    translate([0,-y/4,0])
-    linear_extrude(height=z,center=true,convexity=0,twist=0)
-    offset(r=+r)
-    square([x,y/2],center=true);
-    
-    translate([0,(y+(2*r))/4 + dozadu/2,0])
-    linear_extrude(height=z,center=true,convexity=0,twist=0)
-    square([x+2*r,(y+2*r)/2 + dozadu],center=true);
-}
-
 /* rounded cube - 2 circles + hull + linear extrude */
 module rc2CHLE(x, y, z, r) {
     /* TODO - this should replace rc4CH */
 }
 
-module rc(x,y,z,r,i,c, dozadu) {
+module rc(x,y,z,r) { 
     if (y == 0) {
-        if (i == c - 1) {
-            r4cLE(x,1e-4,z,r, dozadu);
-        } else {
-            r2cLE(x,1e-4,z,r, dozadu);
-        }
+        rc4CH(x,y,z,r);
     } else {
-        if (i == c - 1) {
-            r4cLE(x,y,z,r, dozadu);
-        } else {
-            r2cLE(x,y,z,r, dozadu);
-        }
+        rcLE(x,y,z,r);
     }
 }
 
@@ -68,50 +59,52 @@ module rc(x,y,z,r,i,c, dozadu) {
 /* CARDHOLDER ***********************************************/
 /************************************************************/
 
-module without_holes(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z) {
-    
+/* see module one_card how the args for this function are computed */ 
+module one_card_draw(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z) {
+
     translate([0,
         to_side, //y
         to_z + to_up //z
     ]) {
-        rc(x, z, ch_height, t + s, i, c, z + s);                
+        /* by differencing two rc's, create the one-card
+           holder without any "cork" */
+        difference() {
+            //color("blue")
+            rc(x, z, ch_height, t + s);
+            
+            //color("blue")
+            rc(x, z, ch_height, s);
+        }
         
         /* this is the "cork" */
         //color("blue")
         translate([0, 0, bottom_offset  - (to_up / 2)])
-            rc(x, z, t + to_up, t + s, i, c, z + s);
-    }    
-}
-
-module holes(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z) {
-    
-    translate([0,
-        to_side, //y
-        to_z + to_up //z
-    ]) {
-            rc(x, z, ch_height, s, c - 1, c, 0);              
+            rc(x, z, t + to_up, t + s);
+        
+        /* draw the sides. not if this is the last card */
+        if (i < c - 1) {
+            //color("green")
+            for (mp = [-1, 1]) /* mp = minus 1, plus 1 */
+                translate([
+                        mp * ((x / 2) + s + (t / 2)), //x
+                        side_y / 2, //y
+                        0 - (t / 2) - (to_up / 2) //z
+                ])
+                    cube([
+                        t,
+                        side_y,
+                        ch_height + t + to_up
+                    ], center=true);
+        }
     }
 }
 
-
-
-
-/* see module one_card how the args for this function are computed */ 
-module one_card_draw(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z, holes) {
-    
-    if (holes) {
-        holes(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z);
-    } else {
-        without_holes(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z);
-    }
-}
-
-module one_card(x,y,z,t,s,c,d,v,i,holes) {
+module one_card(x,y,z,t,s,c,d,v,i) {
     /* card height */
     c_height = y * (1 - v);
     
     /* card holder height */
-    ch_height = c_height + s;
+    ch_height = c_height + s; /* FIXME (TADY NEVIM JESTLI TO POCITAM SPRAVNE) */
     
     /* this is where the bottom starts */
     bottom_offset = 0 - (ch_height / 2) - (t / 2);
@@ -139,10 +132,10 @@ module one_card(x,y,z,t,s,c,d,v,i,holes) {
             color("red")
             cube([x,z,y], center=true);
         
-        %one_card_draw(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z, holes);
+        %one_card_draw(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z);
     } else {
         /* if we don't draw the card, draw cardholder normally */
-        one_card_draw(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z, holes);
+        one_card_draw(x,y,z,t,s,c,d,v,i, c_height, ch_height, bottom_offset, side_y, to_side, to_up, to_z);
     }
 }
 
@@ -158,17 +151,11 @@ module draw_cardholder(x,y,z,t,s,c,d,v) {
            when c is one. then we want to draw only
            one card. but we pass i - 1 to the
            one_card function because we want to compute
-           the offset which starts with 0, not 1 */
-    difference() {
-        /* holder without holes */
+           the offset which starts with 0, not 1 */  
         for (i=[1:c]) {
-            one_card(x,y,z,t,s,c,d,v, i - 1, 0);
+            one_card(x,y,z,t,s,c,d,v, i - 1);
         }
-        /* holes */
-        for (i=[1:c]) {
-            one_card(x,y,z,t,s,c,d,v, i - 1, 1);
-        }
-    }
+
 }
 
 /* if the delta is negative, make it positive and rotate
@@ -262,7 +249,7 @@ See the references in the code.
 /************************************************************/
 
 test_no = 0;
-test_no_str = "no";
+test_no_str = "none";
 
 if (test_no_str == "small") {
     cardholder(size=[8.5, 5.4, 0.1], thickness=0.3, spacing=0.1, cards=4, delta=2.5, visibility=0.3);
@@ -275,7 +262,7 @@ if (test_no_str == "big") {
 }
 
 if (test_no_str == "edux") {
-    cardholder(size=[1, 20, 20], thickness=30, spacing=10, cards=4, delta=25, visibility=0.3);
+    cardholder(size=[85, 54, 1], thickness=3, spacing=1, cards=4, delta=25, visibility=0.3);
     echo("TEST #2: edux default copied <<<<<");
 }
 
