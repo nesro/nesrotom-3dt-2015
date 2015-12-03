@@ -2,6 +2,7 @@
 /* https://github.com/nesro/nesrotom-3dt-2015 */
 /* nesrotom@fit.cvut.cz */
 /* v0 3.12.2015 */
+/* v1 3.12.2015 */
 
 SHOW_EDUX_DEFAULT_CRYSTAL = 0;
 SHOW_EDUX_DEFAULT_RANDOM_CRYSTAL = 0;
@@ -14,20 +15,19 @@ module spike(rotx, roty, rotz, height, circumr, seg) {
     lo_height = height - hi_height;     
         
     rotate([rotx, roty, rotz])
-    translate([0, 0, lo_height / 2])
     union() {
         cylinder(
             h = lo_height,
             r1 = circumr / 3,
             r2 = circumr,
-            center = true);
+            center = false);
         
-        translate([0, 0, (lo_height / 2) + (hi_height / 2)])
+        translate([0, 0, lo_height])
         cylinder(
             h = hi_height,
             r1 = circumr,
             r2 = 0,
-            center = true);
+            center = false);
         }
 }
 
@@ -58,10 +58,9 @@ module random_crystal(
             rotz = rands(rot[0], rot[1], 1)[0],
             height = rands(height[0], height[1], 1)[0],
             circumr = rands(circumr[0], circumr[1], 1)[0],
-            seg = round(rands(seg[0], seg[1], 1)[0])
+            seg = round(rands(seg[0] - 0.5, seg[1] + 0.5, 1)[0])
         );
     }
-    
 }
 
 if (SHOW_EDUX_DEFAULT_CRYSTAL) {
