@@ -1,0 +1,12 @@
+https://edux.fit.cvut.cz/courses/BI-3DT/classification/semestralka
+
+nesrotom 112 113 114
+
+https://edux.fit.cvut.cz/courses/BI-3DT/_media/classification/crystals151/crystal112.scad
+https://edux.fit.cvut.cz/courses/BI-3DT/_media/classification/crystals151/crystal112.stl
+
+https://edux.fit.cvut.cz/courses/BI-3DT/_media/classification/crystals151/crystal113.scad
+https://edux.fit.cvut.cz/courses/BI-3DT/_media/classification/crystals151/crystal113.stl
+
+https://edux.fit.cvut.cz/courses/BI-3DT/_media/classification/crystals151/crystal114.scad
+https://edux.fit.cvut.cz/courses/BI-3DT/_media/classification/crystals151/crystal114.stl
