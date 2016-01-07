@@ -6,9 +6,14 @@
 
 SHOW_EDUX_DEFAULT_CRYSTAL = 0;
 SHOW_EDUX_DEFAULT_RANDOM_CRYSTAL = 0;
+PRINT_DEBUG_INFO = 0;
 
 module spike(rotx, roty, rotz, height, circumr, seg) {
-    echo(rotx,roty,rotz,height,circumr,seg);
+    
+    if (PRINT_DEBUG_INFO) {
+        echo(rotx,roty,rotz,height,circumr,seg);
+    }
+    
     $fn = seg;
 
     hi_height = pow(height, 1 / 3);
