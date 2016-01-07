@@ -57,20 +57,20 @@ module top() {
 
 
 /* CAST 1: spodek */
-if (1) {
+if (0) {
     bottom();
 }
 
 a = 100;
 vedlesebe=75;
 
-if (1) {
+if (0) {
     translate([vedlesebe,0,0])
     top();
 }
 
 /* CAST 2: Q1 vrsku */
-if (0) {
+if (1) {
     translate([0,-vedlesebe,0])
     rotate(a=45, v=[1,-1,0])
     intersection(){
