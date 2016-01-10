@@ -7,16 +7,16 @@
 - ./crystal.scad
 
 === scad soubor volající modul crystal s vašimi vybranými daty (který jste si stáhli z Eduxu) ===
-./crystal_data/11X/crystal114_full.scad
+./crystal_data/114/crystal114_full.scad
 
 === STL soubor s vaším vybraným krystalem z Eduxu ===
-./crystal_data/11X/crystal114_full.stl
+./crystal_data/114/crystal114_full.stl
 
 === Tiskové STL soubory ===
-./crystal_data/11X/crystal114_slic3r.stl
+./crystal_data/114/crystal114_slic3r.stl
 
 === Tiskové GCODE soubory ===
-./crystal_data/11X/crystal114.gcode
+./crystal_data/114/crystal114.gcode
 
 === Profil pro slicovací program (co jsem zmenil je napsany nahore) ===
 ./nesrotom_Slic3r_config_bundle.ini
