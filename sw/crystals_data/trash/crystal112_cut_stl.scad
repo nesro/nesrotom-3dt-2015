@@ -1,1 +1,0 @@
-import("crystal112_cut.stl");
