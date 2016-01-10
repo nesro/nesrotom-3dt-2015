@@ -1,1 +1,0 @@
-import("nesrotom_wip_crystal112.stl");

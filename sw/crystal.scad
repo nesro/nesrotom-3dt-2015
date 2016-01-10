@@ -1,8 +1,6 @@
 /* https://edux.fit.cvut.cz/courses/BI-3DT/classification/semestralka */
 /* https://github.com/nesro/nesrotom-3dt-2015 */
 /* nesrotom@fit.cvut.cz */
-/* v0 3.12.2015 */
-/* v1 3.12.2015 */
 
 SHOW_EDUX_DEFAULT_CRYSTAL = 0;
 SHOW_EDUX_DEFAULT_RANDOM_CRYSTAL = 0;
@@ -75,3 +73,97 @@ if (SHOW_EDUX_DEFAULT_CRYSTAL) {
 if (SHOW_EDUX_DEFAULT_RANDOM_CRYSTAL) {
     random_crystal();   
 }
+
+/* helper functions for cutting */
+
+module bottom(){
+    rotate([0,180,0])
+        intersection() {
+            c();
+    
+            translate([0,0,-50])
+                cube(100, center=true);
+        }
+}
+
+module top() {
+    intersection() {
+        c();
+        
+        translate([0,0,50])
+            cube(100, center=true);
+    }
+}
+
+a = 100;
+vedlesebe=40;
+
+/* Q1 of top */
+module q1() {
+    //translate([0,-vedlesebe,0])
+    rotate(a=45, v=[1,-1,0])
+    intersection(){
+        top();
+        
+        translate([0,0,0])
+        cube(a, center=false);
+    }
+}
+
+/* Q2 of top */
+module q2() {
+    //translate([0,vedlesebe,0])
+    rotate(a=45, v=[1,-1,0])
+    rotate([0,90,0])
+    intersection(){
+        top();
+
+        translate([-a,0,0])
+        cube(a, center=false);
+    }
+}
+
+/* Q3 of top */
+module q3() {
+    //translate([-vedlesebe,0,0])
+    rotate(a=45, v=[1,-1,0])
+    rotate([-90,0,0])
+    intersection(){
+        top();
+        
+        translate([0,-a,0])
+        cube(a, center=false);
+    }
+}
+
+/* Q4 of top */
+module q4() {
+    //translate([vedlesebe,0,0])
+    rotate(a=45, v=[1,-1,0])
+    rotate([-90,90,0])
+    intersection(){
+        top();
+        
+        translate([-a,-a,0])
+        cube(a, center=false);
+    }
+}
+
+module h1() {
+        intersection(){
+        top();
+        
+        translate([-a,-a/2,0])
+        cube(a, center=false);
+    }
+}
+
+module h2() {
+        intersection(){
+        top();
+        
+        translate([0,-a/2,0])
+        cube(a, center=false);
+    }
+}
+
